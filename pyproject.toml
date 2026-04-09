@@ -1,0 +1,14 @@
+[project]
+name = "ai110-module3show-musicrecommendersimulation-starter"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "pandas>=2.3.3",
+    "pytest>=9.0.2",
+    "streamlit>=1.55.0",
+]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]

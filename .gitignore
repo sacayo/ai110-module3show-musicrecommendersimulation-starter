@@ -13,3 +13,6 @@ venv/
 
 # Pytest cache
 .pytest_cache/
+
+# Personal docs
+FOR_SAM.md

@@ -1,4 +1,4 @@
-# 🎵 Music Recommender Simulation
+ # 🎵 Music Recommender Simulation
 
 ## Project Summary
 
@@ -17,17 +17,45 @@ Replace this paragraph with your own summary of what your version does.
 
 ## How The System Works
 
-Explain your design in plain language.
+Explain your design in plain language. 
+  - Our recommender system compares a user's taste preference (favorite genre, mood, energy level, and acoustic preference) against each song's audio features (genre, mood, energy, tempo, valence, etc) to calculate a similarity score. Songs are ranked by score and the top k are returned. 
 
 Some prompts to answer:
 
 - What features does each `Song` use in your system
+  - In our recommender system, we will use `energy`, `valence`, `dancability`, `acousticness`, `temp_dpm`, `genre`, and `artist`. 
   - For example: genre, mood, energy, tempo
 - What information does your `UserProfile` store
+  - The `UserProfile` stores four preference fields: `favorite_genre` (a string like "lofi" or "pop"), `favorite_mood` (a string like "chill" or "happy"), `target_energy` (a float between 0.0 and 1.0 representing how energetic the user wants their music), and `likes_acoustic` (a boolean for whether the user prefers acoustic-sounding tracks). Together these four dimensions give the system enough signal to distinguish between very different listener types, such as someone who wants intense rock versus someone who wants calm lofi.
 - How does your `Recommender` compute a score for each song
+  - For each song, the system checks four dimensions and adds up points: +2.0 for a genre match, +1.0 for a mood match, up to +1.0 for energy similarity (calculated as `1.0 - abs(song.energy - target_energy)`, so closer values earn more), and +0.5 if the song's acousticness fits the user's preference (above 0.6 for acoustic lovers, below 0.4 otherwise). The maximum possible score is 4.5. Genre carries the most weight because it is the strongest signal of listener intent.
 - How do you choose which songs to recommend
+  - Every song in the catalog gets scored against the user's profile, then the full list is sorted from highest to lowest score. The system returns the top K songs (default 5) along with their scores and a human-readable explanation string showing which dimensions matched and how close the energy was. This means the recommendations are purely rank-ordered by fit, with no randomness or diversity re-ranking applied.
+- Potential biases
+  - This system might over-prioritize genre, since a genre match alone (2.0 pts) can outweigh mood, energy, and acoustic fit combined (2.5 pts max). A song that matches genre but clashes on every other dimension can still rank above a song that perfectly matches mood, energy, and acousticness but belongs to a neighboring genre. The system also treats similar genres as completely different: "indie pop" and "pop" score as a total mismatch, even though most pop listeners would enjoy both. Finally, because valence, danceability, and tempo are ignored entirely, the system cannot distinguish "happy pop" from "melancholic pop" or a slow ballad from an uptempo dance track within the same genre.
 
-You can include a simple diagram or bullet list if helpful.
+```
+  INPUT                    PROCESS                        OUTPUT
+┌───────────┐   ┌──────────────────────────────┐   ┌─────────────┐
+│ songs.csv │──▶│  load_songs()                 │   │             │
+└───────────┘   │  List of song dicts           │   │  Top-K      │
+                └──────────────┬───────────────┘   │  Results    │
+┌───────────┐                  │                   │             │
+│ User      │   ┌──────────────▼───────────────┐   │ (song,      │
+│ Prefs     │──▶│  For each song:               │──▶│  score,     │
+│           │   │                              │   │  explain)   │
+│ genre     │   │  Genre match?   +0 or +2.0   │   │             │
+│ mood      │   │  Mood match?    +0 or +1.0   │   └─────────────┘
+│ energy    │   │  Energy sim.    +0.0 to +1.0 │
+│ likes_    │   │  Acoustic fit?  +0 or +0.5   │
+│  acoustic │   │  ──────────────────────────  │
+└───────────┘   │  total score = sum above     │
+                │  explanation = describe why  │
+                │                              │
+                │  Sort by score DESC          │
+                │  Return top K                │
+                └──────────────────────────────┘
+```
 
 ---
 

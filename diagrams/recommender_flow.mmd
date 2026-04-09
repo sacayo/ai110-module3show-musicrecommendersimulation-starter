@@ -1,0 +1,30 @@
+flowchart TD
+    CSV[songs.csv] -->|load_songs| SL[Song List]
+    UP[User Prefs\ngenre · mood · energy · likes_acoustic] --> LOOP
+
+    SL --> LOOP[For each song in list]
+
+    LOOP --> G{Genre match?}
+    G -- yes --> GP[+2.0 pts]
+    G -- no --> GP0[+0.0 pts]
+
+    LOOP --> M{Mood match?}
+    M -- yes --> MP[+1.0 pts]
+    M -- no --> MP0[+0.0 pts]
+
+    LOOP --> E[Energy similarity]
+    E --> EP[+0.0 to 1.0 pts]
+
+    LOOP --> A{Acoustic fit?}
+    A -- yes --> AP[+0.5 pts]
+    A -- no --> AP0[+0.0 pts]
+
+    GP & GP0 & MP & MP0 & EP & AP & AP0 --> SUM[Sum all points]
+    SUM --> EXP[Build explanation string]
+    EXP --> COLLECT[Collect: song, score, explanation]
+
+    COLLECT --> NEXT{More songs?}
+    NEXT -- yes --> LOOP
+    NEXT -- no --> SORT[Sort by score DESC]
+    SORT --> TOPK[Slice top K]
+    TOPK --> OUT[Print recommendations]
