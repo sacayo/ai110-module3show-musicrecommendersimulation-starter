@@ -42,10 +42,10 @@ class Recommender:
         """Score a song against a user profile on genre, mood, energy, and acousticness."""
         score = 0.0
         if song.genre == user.favorite_genre:
-            score += 2.0
+            score += 1.0
         if song.mood == user.favorite_mood:
             score += 1.0
-        score += 1.0 * (1.0 - abs(song.energy - user.target_energy))
+        score += 2.0 * (1.0 - abs(song.energy - user.target_energy))
         if user.likes_acoustic and song.acousticness > 0.6:
             score += 0.5
         elif not user.likes_acoustic and song.acousticness < 0.4:
@@ -109,7 +109,7 @@ def _score_song_dict(user_prefs: Dict, song: Dict) -> Tuple[float, str]:
 
     genre_match = song["genre"] == user_prefs.get("genre", "")
     if genre_match:
-        score += 2.0
+        score += 1.0
     parts.append(f"Genre: {song['genre']} {'✓' if genre_match else '✗'}")
 
     mood_match = song["mood"] == user_prefs.get("mood", "")
@@ -119,7 +119,7 @@ def _score_song_dict(user_prefs: Dict, song: Dict) -> Tuple[float, str]:
 
     target_energy = user_prefs.get("energy", 0.5)
     energy_diff = abs(song["energy"] - target_energy)
-    score += 1.0 * (1.0 - energy_diff)
+    score += 2.0 * (1.0 - energy_diff)
     if energy_diff < 0.10:
         proximity = "very close"
     elif energy_diff < 0.25:
